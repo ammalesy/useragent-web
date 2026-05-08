@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>User Agent Inspector</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              mono: ["JetBrains Mono", "Fira Code", "monospace"],
+            },
+          },
+        },
+      };
+    </script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        font-family: "Inter", sans-serif;
+      }
+      .mono {
+        font-family: "JetBrains Mono", monospace;
+      }
+      .fade-in {
+        animation: fadeIn 0.4s ease-in-out;
+      }
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(8px); }
+        to   { opacity: 1; transform: translateY(0); }
+      }
+      .copy-toast {
+        transition: opacity 0.3s ease;
+      }
+    </style>
+  </head>
+  <body class="min-h-screen bg-gray-950 text-gray-100">
+
+    <!-- Header -->
+    <header class="border-b border-gray-800 bg-gray-900/80 backdrop-blur sticky top-0 z-10">
+      <div class="max-w-5xl mx-auto px-4 py-4 flex items-center gap-3">
+        <div class="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center text-white text-sm font-bold">UA</div>
+        <h1 class="text-lg font-semibold text-white">User Agent Inspector</h1>
+        <span class="ml-auto text-xs text-gray-500 mono" id="timestamp"></span>
+      </div>
+    </header>
+
+    <main class="max-w-5xl mx-auto px-4 py-10 space-y-8 fade-in">
+
+      <!-- Raw UA Section -->
+      <section>
+        <div class="flex items-center justify-between mb-3">
+          <h2 class="text-sm font-semibold uppercase tracking-widest text-gray-400">Raw User-Agent String</h2>
+          <button
+            id="copyBtn"
+            onclick="copyUA()"
+            class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 active:scale-95 transition text-xs font-medium text-white"
+          >
+            <svg id="copyIcon" xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-4 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+            </svg>
+            <span id="copyLabel">Copy</span>
+          </button>
+        </div>
+        <div class="relative">
+          <textarea
+            id="uaText"
+            readonly
+            rows="4"
+            class="w-full mono text-sm bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-green-400 resize-none focus:outline-none focus:border-indigo-500 leading-relaxed"
+          ></textarea>
+        </div>
+      </section>
+
+      <!-- Parsed Values -->
+      <section>
+        <h2 class="text-sm font-semibold uppercase tracking-widest text-gray-400 mb-4">Parsed Values</h2>
+        <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3" id="parsedGrid"></div>
+      </section>
+
+      <!-- Raw Tokens -->
+      <section>
+        <h2 class="text-sm font-semibold uppercase tracking-widest text-gray-400 mb-4">UA Tokens</h2>
+        <div class="flex flex-wrap gap-2" id="tokenList"></div>
+      </section>
+
+    </main>
+
+    <footer class="mt-16 border-t border-gray-800 py-6 text-center text-xs text-gray-600">
+      Built with Tailwind CSS &middot; Deployed on Vercel
+    </footer>
+
+    <script>
+      // ─── Helpers ──────────────────────────────────────────────────────────────
+      function q(sel) { return document.getElementById(sel); }
+
+      function setTimestamp() {
+        const now = new Date();
+        q("timestamp").textContent = now.toLocaleString();
+      }
+
+      // ─── Copy ─────────────────────────────────────────────────────────────────
+      function copyUA() {
+        const ua = navigator.userAgent;
+        navigator.clipboard.writeText(ua).then(() => {
+          q("copyLabel").textContent = "Copied!";
+          q("copyIcon").innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />`;
+          q("copyBtn").classList.replace("bg-indigo-600", "bg-green-600");
+          setTimeout(() => {
+            q("copyLabel").textContent = "Copy";
+            q("copyIcon").innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-4 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />`;
+            q("copyBtn").classList.replace("bg-green-600", "bg-indigo-600");
+          }, 2000);
+        });
+      }
+
+      // ─── Parser ───────────────────────────────────────────────────────────────
+      function parseUA(ua) {
+        const fields = [];
+
+        // Browser
+        const browsers = [
+          { name: "Edge",            rx: /Edg(?:e|A|iOS)?\/([0-9.]+)/ },
+          { name: "Samsung Browser", rx: /SamsungBrowser\/([0-9.]+)/ },
+          { name: "Opera",           rx: /OPR\/([0-9.]+)|Opera\/([0-9.]+)/ },
+          { name: "Chrome",          rx: /Chrome\/([0-9.]+)/ },
+          { name: "Firefox",         rx: /Firefox\/([0-9.]+)/ },
+          { name: "Safari",          rx: /Version\/([0-9.]+).*Safari/ },
+          { name: "IE",              rx: /MSIE ([0-9.]+)|Trident\/.*rv:([0-9.]+)/ },
+        ];
+        let browser = { name: "Unknown", version: "—" };
+        for (const b of browsers) {
+          const m = ua.match(b.rx);
+          if (m) { browser = { name: b.name, version: (m[1] || m[2] || "Unknown").split(".")[0] + "." + ((m[1] || m[2] || "").split(".")[1] || "x") }; break; }
+        }
+        fields.push({ label: "Browser", value: browser.name, sub: "v" + browser.version, color: "indigo" });
+
+        // Engine
+        let engine = "Unknown";
+        if (/Gecko\/[0-9]/.test(ua) && /Firefox/.test(ua)) engine = "Gecko";
+        else if (/AppleWebKit\/[0-9]/.test(ua))            engine = "WebKit / Blink";
+        else if (/Trident\//.test(ua))                     engine = "Trident";
+        else if (/Presto\//.test(ua))                      engine = "Presto";
+        const engVer = (ua.match(/(?:AppleWebKit|Gecko|Trident)\/([0-9.]+)/) || [])[1] || "—";
+        fields.push({ label: "Engine", value: engine, sub: engVer, color: "violet" });
+
+        // OS
+        const osList = [
+          { name: "Windows 11",  rx: /Windows NT 10\.0.*Win64/ },
+          { name: "Windows 10",  rx: /Windows NT 10\.0/ },
+          { name: "Windows 8.1", rx: /Windows NT 6\.3/ },
+          { name: "Windows 8",   rx: /Windows NT 6\.2/ },
+          { name: "Windows 7",   rx: /Windows NT 6\.1/ },
+          { name: "macOS",       rx: /Mac OS X ([0-9_]+)/ },
+          { name: "iOS",         rx: /iPhone OS ([0-9_]+)/ },
+          { name: "iPadOS",      rx: /iPad.*OS ([0-9_]+)/ },
+          { name: "Android",     rx: /Android ([0-9.]+)/ },
+          { name: "Linux",       rx: /Linux/ },
+          { name: "ChromeOS",    rx: /CrOS/ },
+        ];
+        let os = { name: "Unknown", version: "—" };
+        for (const o of osList) {
+          const m = ua.match(o.rx);
+          if (m) { os = { name: o.name, version: m[1] ? m[1].replace(/_/g, ".") : "—" }; break; }
+        }
+        fields.push({ label: "Operating System", value: os.name, sub: os.version !== "—" ? os.version : "", color: "sky" });
+
+        // Device type
+        let deviceType = "Desktop";
+        let deviceIcon = "🖥️";
+        if (/Mobile|Android.*Mobile/.test(ua))            { deviceType = "Mobile Phone"; deviceIcon = "📱"; }
+        else if (/iPad|Android(?!.*Mobile)|Tablet/.test(ua)) { deviceType = "Tablet"; deviceIcon = "📟"; }
+        else if (/TV|SmartTV|HbbTV/.test(ua))              { deviceType = "Smart TV"; deviceIcon = "📺"; }
+        else if (/bot|crawl|spider/i.test(ua))             { deviceType = "Bot / Crawler"; deviceIcon = "🤖"; }
+        fields.push({ label: "Device Type", value: deviceIcon + " " + deviceType, sub: "", color: "teal" });
+
+        // Architecture
+        let arch = "Unknown";
+        if (/Win64|x64|x86_64|WOW64/.test(ua))  arch = "x86-64 (64-bit)";
+        else if (/Win32|i686|i386/.test(ua))     arch = "x86 (32-bit)";
+        else if (/arm|aarch64/i.test(ua))        arch = "ARM";
+        fields.push({ label: "Architecture", value: arch, sub: "", color: "amber" });
+
+        // Language (best-effort from navigator)
+        const lang = navigator.language || navigator.languages?.[0] || "Unknown";
+        fields.push({ label: "Language", value: lang, sub: (navigator.languages || []).slice(0,3).join(", "), color: "rose" });
+
+        // Platform
+        const platform = navigator.platform || "Unknown";
+        fields.push({ label: "Platform", value: platform, sub: "", color: "orange" });
+
+        // Cookies
+        fields.push({ label: "Cookies", value: navigator.cookieEnabled ? "Enabled" : "Disabled", sub: "", color: navigator.cookieEnabled ? "green" : "red" });
+
+        // Hardware concurrency
+        const cores = navigator.hardwareConcurrency;
+        if (cores) fields.push({ label: "CPU Cores", value: cores + " logical cores", sub: "", color: "cyan" });
+
+        // Screen
+        fields.push({ label: "Screen Resolution", value: `${screen.width} × ${screen.height}`, sub: `${window.devicePixelRatio}x DPR`, color: "purple" });
+
+        // Viewport
+        fields.push({ label: "Viewport", value: `${window.innerWidth} × ${window.innerHeight}`, sub: "px", color: "fuchsia" });
+
+        // Touch
+        const touch = navigator.maxTouchPoints > 0;
+        fields.push({ label: "Touch Support", value: touch ? `Yes (${navigator.maxTouchPoints} points)` : "No", sub: "", color: touch ? "green" : "gray" });
+
+        return fields;
+      }
+
+      // ─── Tokenizer ────────────────────────────────────────────────────────────
+      function tokenizeUA(ua) {
+        // Extract parenthesised groups and product tokens
+        const tokens = [];
+        const parenRx = /\(([^)]+)\)/g;
+        let m;
+        while ((m = parenRx.exec(ua)) !== null) {
+          m[1].split(/;\s*/).forEach(t => tokens.push({ text: t.trim(), type: "paren" }));
+        }
+        ua.replace(/\([^)]*\)/g, "").trim().split(/\s+/).forEach(t => {
+          if (t) tokens.push({ text: t, type: "product" });
+        });
+        return tokens;
+      }
+
+      // ─── Render ───────────────────────────────────────────────────────────────
+      const colorMap = {
+        indigo: "bg-indigo-950 border-indigo-700 text-indigo-300",
+        violet: "bg-violet-950 border-violet-700 text-violet-300",
+        sky:    "bg-sky-950 border-sky-700 text-sky-300",
+        teal:   "bg-teal-950 border-teal-700 text-teal-300",
+        amber:  "bg-amber-950 border-amber-700 text-amber-300",
+        rose:   "bg-rose-950 border-rose-700 text-rose-300",
+        orange: "bg-orange-950 border-orange-700 text-orange-300",
+        green:  "bg-green-950 border-green-700 text-green-300",
+        red:    "bg-red-950 border-red-700 text-red-300",
+        cyan:   "bg-cyan-950 border-cyan-700 text-cyan-300",
+        purple: "bg-purple-950 border-purple-700 text-purple-300",
+        fuchsia:"bg-fuchsia-950 border-fuchsia-700 text-fuchsia-300",
+        gray:   "bg-gray-800 border-gray-600 text-gray-300",
+      };
+
+      function renderCard({ label, value, sub, color }) {
+        const cls = colorMap[color] || colorMap.gray;
+        return `
+          <div class="rounded-xl border ${cls} px-4 py-3 space-y-1">
+            <p class="text-xs font-medium uppercase tracking-wider opacity-60">${label}</p>
+            <p class="text-sm font-semibold break-all">${value}</p>
+            ${sub ? `<p class="text-xs opacity-50 mono">${sub}</p>` : ""}
+          </div>`;
+      }
+
+      function renderToken({ text, type }) {
+        const base = type === "product"
+          ? "bg-gray-800 text-gray-300 border border-gray-700"
+          : "bg-gray-900 text-gray-400 border border-gray-700";
+        return `<span class="mono text-xs px-2.5 py-1 rounded-lg ${base}">${text}</span>`;
+      }
+
+      // ─── Init ─────────────────────────────────────────────────────────────────
+      function init() {
+        const ua = navigator.userAgent;
+        q("uaText").value = ua;
+        setTimestamp();
+
+        const fields = parseUA(ua);
+        q("parsedGrid").innerHTML = fields.map(renderCard).join("");
+
+        const tokens = tokenizeUA(ua);
+        q("tokenList").innerHTML = tokens.map(renderToken).join("");
+      }
+
+      window.addEventListener("DOMContentLoaded", init);
+    </script>
+  </body>
+</html>
