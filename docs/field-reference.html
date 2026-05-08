@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>User Agent Inspector — Field Reference</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    code, pre { font-family: 'JetBrains Mono', monospace; }
+    table { border-collapse: collapse; width: 100%; }
+    th, td { border: 1px solid #374151; padding: 0.5rem 0.75rem; text-align: left; }
+    th { background: #1f2937; font-weight: 600; }
+    tr:nth-child(even) { background: #111827; }
+    pre { background: #111827; border: 1px solid #374151; border-radius: 0.5rem; padding: 1rem; overflow-x: auto; }
+    code { background: #1f2937; padding: 0.125rem 0.375rem; border-radius: 0.25rem; font-size: 0.85em; }
+    pre code { background: none; padding: 0; }
+    hr { border-color: #374151; margin: 2rem 0; }
+    h1 { font-size: 1.75rem; font-weight: 700; margin-bottom: 0.5rem; }
+    h2 { font-size: 1.35rem; font-weight: 700; margin-top: 2.5rem; margin-bottom: 1rem; border-bottom: 1px solid #374151; padding-bottom: 0.5rem; }
+    h3 { font-size: 1.1rem; font-weight: 600; margin-top: 2rem; margin-bottom: 0.75rem; }
+    a { color: #818cf8; text-decoration: underline; }
+    @media print {
+      body { background: white; color: black; }
+      th { background: #e5e7eb; }
+      tr:nth-child(even) { background: #f9fafb; }
+      th, td { border-color: #d1d5db; }
+      pre { background: #f3f4f6; border-color: #d1d5db; }
+      code { background: #e5e7eb; }
+      hr { border-color: #d1d5db; }
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-gray-950 text-gray-100">
+  <div class="max-w-4xl mx-auto px-6 py-12">
+
+    <h1>User Agent Inspector — Field Reference</h1>
+    <p class="text-gray-400 mb-8"><strong>Version:</strong> 2.0 &nbsp;|&nbsp; <strong>Date:</strong> May 2026 &nbsp;|&nbsp; <strong>Project:</strong> useragent-web</p>
+
+    <hr>
+
+    <h2>1. User-Agent String</h2>
+
+    <table>
+      <thead><tr><th>Attribute</th><th>Detail</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Definition</strong></td><td>A text string sent by the browser in every HTTP request identifying the application, OS, and platform.</td></tr>
+        <tr><td><strong>API</strong></td><td><code>navigator.userAgent</code></td></tr>
+      </tbody>
+    </table>
+
+    <p class="mt-4"><strong>Extraction:</strong></p>
+    <pre><code>const ua = navigator.userAgent;</code></pre>
+
+    <p class="mt-4"><strong>Example output:</strong></p>
+    <pre><code>Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36</code></pre>
+
+    <p class="mt-4"><strong>Platform Variations:</strong></p>
+    <table>
+      <thead><tr><th>Platform</th><th>Typical UA Pattern</th></tr></thead>
+      <tbody>
+        <tr><td>Desktop (macOS)</td><td><code>Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/...</code></td></tr>
+        <tr><td>Desktop (Windows)</td><td><code>Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/...</code></td></tr>
+        <tr><td>iOS (Safari)</td><td><code>Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/...</code></td></tr>
+        <tr><td>iOS (Chrome)</td><td>Same as Safari (WebKit required on iOS) + <code>CriOS/125.0</code></td></tr>
+        <tr><td>Android (Chrome)</td><td><code>Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/... Chrome/125.0 Mobile Safari/...</code></td></tr>
+        <tr><td>Android (Samsung)</td><td>Same structure + <code>SamsungBrowser/25.0</code></td></tr>
+        <tr><td>iPad (Desktop mode)</td><td>Identical to macOS — use <code>maxTouchPoints</code> to differentiate</td></tr>
+      </tbody>
+    </table>
+
+    <p class="mt-4 text-gray-400 text-sm"><strong>Key note:</strong> On iOS, all browsers (Chrome, Firefox, etc.) are forced to use WebKit. Their UA strings differ only by a version token (e.g., <code>CriOS</code>, <code>FxiOS</code>), not by engine.</p>
+
+    <hr>
+
+    <h2>2. Browser Environment</h2>
+    <p class="text-gray-400">These values come from JavaScript APIs, not the UA string.</p>
+
+    <!-- 2.1 Touch Support -->
+    <h3>2.1 Touch Support</h3>
+    <table>
+      <thead><tr><th>Attribute</th><th>Detail</th></tr></thead>
+      <tbody>
+        <tr><td><strong>What it is</strong></td><td>How many fingers the screen can detect simultaneously. <code>0</code> means no touch screen.</td></tr>
+        <tr><td><strong>API</strong></td><td><code>navigator.maxTouchPoints</code></td></tr>
+      </tbody>
+    </table>
+    <pre><code>const points = navigator.maxTouchPoints; // 0 = no touch, 5 = typical tablet/phone</code></pre>
+    <table>
+      <thead><tr><th>Platform</th><th>Typical Value</th></tr></thead>
+      <tbody>
+        <tr><td>Desktop (no touch)</td><td><code>0</code></td></tr>
+        <tr><td>iPad / iPhone</td><td><code>5</code></td></tr>
+        <tr><td>Android phone/tablet</td><td><code>5</code> or <code>10</code></td></tr>
+        <tr><td>Windows touch laptop</td><td><code>10</code></td></tr>
+      </tbody>
+    </table>
+    <p class="text-sm text-gray-400 mt-2"><strong>Use case:</strong> Distinguishes iPad-in-desktop-mode (<code>Macintosh</code> UA + <code>maxTouchPoints &gt; 1</code>) from a real Mac (<code>maxTouchPoints === 0</code>).</p>
+
+    <!-- 2.2 Platform -->
+    <h3>2.2 Platform</h3>
+    <table>
+      <thead><tr><th>Attribute</th><th>Detail</th></tr></thead>
+      <tbody>
+        <tr><td><strong>What it is</strong></td><td>A short string identifying the OS/CPU the browser runs on.</td></tr>
+        <tr><td><strong>API</strong></td><td><code>navigator.platform</code> (deprecated but functional)</td></tr>
+      </tbody>
+    </table>
+    <pre><code>const platform = navigator.platform;</code></pre>
+    <table>
+      <thead><tr><th>Platform</th><th>Value</th></tr></thead>
+      <tbody>
+        <tr><td>macOS (Intel/Apple Silicon)</td><td><code>MacIntel</code></td></tr>
+        <tr><td>iPad (desktop mode)</td><td><code>MacIntel</code></td></tr>
+        <tr><td>Windows</td><td><code>Win32</code></td></tr>
+        <tr><td>Linux</td><td><code>Linux x86_64</code></td></tr>
+        <tr><td>iPhone</td><td><code>iPhone</code></td></tr>
+        <tr><td>Android</td><td><code>Linux armv81</code> or <code>Linux aarch64</code></td></tr>
+      </tbody>
+    </table>
+
+    <!-- 2.3 Cookies -->
+    <h3>2.3 Cookies</h3>
+    <table>
+      <thead><tr><th>Attribute</th><th>Detail</th></tr></thead>
+      <tbody>
+        <tr><td><strong>What it is</strong></td><td>Whether the browser accepts first-party cookies.</td></tr>
+        <tr><td><strong>API</strong></td><td><code>navigator.cookieEnabled</code></td></tr>
+      </tbody>
+    </table>
+    <pre><code>const enabled = navigator.cookieEnabled; // boolean</code></pre>
+
+    <!-- 2.4 CPU Cores -->
+    <h3>2.4 CPU Cores</h3>
+    <table>
+      <thead><tr><th>Attribute</th><th>Detail</th></tr></thead>
+      <tbody>
+        <tr><td><strong>What it is</strong></td><td>Number of logical CPU threads available to the browser.</td></tr>
+        <tr><td><strong>API</strong></td><td><code>navigator.hardwareConcurrency</code></td></tr>
+      </tbody>
+    </table>
+    <pre><code>const cores = navigator.hardwareConcurrency; // e.g., 8</code></pre>
+    <table>
+      <thead><tr><th>Platform</th><th>Typical Values</th></tr></thead>
+      <tbody>
+        <tr><td>Desktop</td><td>4–16+</td></tr>
+        <tr><td>iPhone / iPad</td><td>6 (capped by Safari)</td></tr>
+        <tr><td>Android mid-range</td><td>4–8</td></tr>
+        <tr><td>Android flagship</td><td>8</td></tr>
+      </tbody>
+    </table>
+
+    <!-- 2.5 Screen Resolution -->
+    <h3>2.5 Screen Resolution</h3>
+    <table>
+      <thead><tr><th>Attribute</th><th>Detail</th></tr></thead>
+      <tbody>
+        <tr><td><strong>What it is</strong></td><td>Display size in CSS pixels + device pixel ratio (DPR).</td></tr>
+        <tr><td><strong>API</strong></td><td><code>screen.width</code>, <code>screen.height</code>, <code>window.devicePixelRatio</code></td></tr>
+      </tbody>
+    </table>
+    <pre><code>const w = screen.width;
+const h = screen.height;
+const dpr = devicePixelRatio;</code></pre>
+    <table>
+      <thead><tr><th>Platform</th><th>Resolution</th><th>DPR</th></tr></thead>
+      <tbody>
+        <tr><td>MacBook Pro 14"</td><td>1512 × 982</td><td>2</td></tr>
+        <tr><td>iPhone 15 Pro</td><td>393 × 852</td><td>3</td></tr>
+        <tr><td>iPad Pro 12.9"</td><td>1024 × 1366</td><td>2</td></tr>
+        <tr><td>Android 1080p phone</td><td>412 × 915</td><td>2.625</td></tr>
+        <tr><td>Full HD desktop</td><td>1920 × 1080</td><td>1</td></tr>
+      </tbody>
+    </table>
+
+    <!-- 2.6 Viewport -->
+    <h3>2.6 Viewport</h3>
+    <table>
+      <thead><tr><th>Attribute</th><th>Detail</th></tr></thead>
+      <tbody>
+        <tr><td><strong>What it is</strong></td><td>The visible page area (excludes browser chrome, address bar, toolbars).</td></tr>
+        <tr><td><strong>API</strong></td><td><code>window.innerWidth</code>, <code>window.innerHeight</code></td></tr>
+      </tbody>
+    </table>
+    <pre><code>const vw = window.innerWidth;
+const vh = window.innerHeight;</code></pre>
+    <p class="text-sm text-gray-400 mt-2">On mobile, viewport height changes when the virtual keyboard appears or the address bar collapses.</p>
+
+    <!-- 2.7 Device Memory -->
+    <h3>2.7 Device Memory</h3>
+    <table>
+      <thead><tr><th>Attribute</th><th>Detail</th></tr></thead>
+      <tbody>
+        <tr><td><strong>What it is</strong></td><td>Approximate device RAM in GB (rounded to power of 2 for privacy).</td></tr>
+        <tr><td><strong>API</strong></td><td><code>navigator.deviceMemory</code></td></tr>
+      </tbody>
+    </table>
+    <pre><code>const ram = navigator.deviceMemory; // 0.25, 0.5, 1, 2, 4, or 8</code></pre>
+    <table>
+      <thead><tr><th>Platform</th><th>Support</th></tr></thead>
+      <tbody>
+        <tr><td>Chrome / Edge / Opera / Samsung</td><td>Yes</td></tr>
+        <tr><td>Firefox</td><td>No (<code>undefined</code>)</td></tr>
+        <tr><td>Safari (iOS/macOS)</td><td>No (<code>undefined</code>)</td></tr>
+      </tbody>
+    </table>
+
+    <!-- 2.8 Color Depth -->
+    <h3>2.8 Color Depth</h3>
+    <table>
+      <thead><tr><th>Attribute</th><th>Detail</th></tr></thead>
+      <tbody>
+        <tr><td><strong>What it is</strong></td><td>Bits per pixel the display uses for color.</td></tr>
+        <tr><td><strong>API</strong></td><td><code>screen.colorDepth</code></td></tr>
+      </tbody>
+    </table>
+    <pre><code>const bits = screen.colorDepth; // 24 or 30</code></pre>
+    <table>
+      <thead><tr><th>Value</th><th>Meaning</th></tr></thead>
+      <tbody>
+        <tr><td>24</td><td>Standard True Color (8 bits × RGB) — 16.7M colors</td></tr>
+        <tr><td>30</td><td>HDR / Deep Color (10 bits × RGB) — 1B colors</td></tr>
+      </tbody>
+    </table>
+
+    <!-- 2.9 Reduced Motion -->
+    <h3>2.9 Reduced Motion Preference</h3>
+    <table>
+      <thead><tr><th>Attribute</th><th>Detail</th></tr></thead>
+      <tbody>
+        <tr><td><strong>What it is</strong></td><td>User has enabled "Reduce Motion" in OS accessibility settings to minimize animations.</td></tr>
+        <tr><td><strong>API</strong></td><td><code>matchMedia("(prefers-reduced-motion: reduce)")</code></td></tr>
+      </tbody>
+    </table>
+    <pre><code>const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;</code></pre>
+    <table>
+      <thead><tr><th>Platform</th><th>Where to enable</th></tr></thead>
+      <tbody>
+        <tr><td>iOS</td><td>Settings → Accessibility → Motion → Reduce Motion</td></tr>
+        <tr><td>Android</td><td>Settings → Accessibility → Remove animations</td></tr>
+        <tr><td>macOS</td><td>System Settings → Accessibility → Display → Reduce motion</td></tr>
+        <tr><td>Windows</td><td>Settings → Accessibility → Visual effects → Animation effects OFF</td></tr>
+      </tbody>
+    </table>
+
+    <!-- 2.10 Network Info -->
+    <h3>2.10 Network Information</h3>
+    <table>
+      <thead><tr><th>Attribute</th><th>Detail</th></tr></thead>
+      <tbody>
+        <tr><td><strong>What it is</strong></td><td>Estimated connection quality (not actual WiFi/cellular type).</td></tr>
+        <tr><td><strong>API</strong></td><td><code>navigator.connection</code> (Network Information API)</td></tr>
+      </tbody>
+    </table>
+    <pre><code>const conn = navigator.connection;
+if (conn) {
+  conn.effectiveType; // "slow-2g" | "2g" | "3g" | "4g"
+  conn.downlink;      // Mbps (estimated)
+  conn.rtt;           // ms (round-trip)
+}</code></pre>
+    <table>
+      <thead><tr><th>Platform</th><th>Support</th></tr></thead>
+      <tbody>
+        <tr><td>Chrome / Edge / Opera / Samsung</td><td>Yes</td></tr>
+        <tr><td>Firefox</td><td>No</td></tr>
+        <tr><td>Safari (iOS/macOS)</td><td>No</td></tr>
+      </tbody>
+    </table>
+    <table class="mt-3">
+      <thead><tr><th>Effective Type</th><th>Meaning</th></tr></thead>
+      <tbody>
+        <tr><td><code>4g</code></td><td>≥ 700 Kbps, ≤ 270 ms RTT</td></tr>
+        <tr><td><code>3g</code></td><td>&lt; 700 Kbps, &gt; 270 ms RTT</td></tr>
+        <tr><td><code>2g</code></td><td>&lt; 70 Kbps, &gt; 1400 ms RTT</td></tr>
+        <tr><td><code>slow-2g</code></td><td>&lt; 50 Kbps, &gt; 2000 ms RTT</td></tr>
+      </tbody>
+    </table>
+
+    <!-- 2.11 JavaScript -->
+    <h3>2.11 JavaScript Status</h3>
+    <table>
+      <thead><tr><th>Attribute</th><th>Detail</th></tr></thead>
+      <tbody>
+        <tr><td><strong>What it is</strong></td><td>Confirms JS is running. If this code executes, it's enabled.</td></tr>
+        <tr><td><strong>API</strong></td><td>Implicit</td></tr>
+      </tbody>
+    </table>
+    <pre><code>// Always true if code reaches this point
+const jsEnabled = true;</code></pre>
+    <p class="text-sm text-gray-400 mt-2">For fallback when JS is off, use <code>&lt;noscript&gt;</code> in HTML.</p>
+
+    <hr>
+
+    <!-- Summary -->
+    <h2>3. Summary</h2>
+    <table>
+      <thead>
+        <tr><th>#</th><th>Field</th><th>API</th><th>iOS</th><th>Android</th><th>Desktop</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>1</td><td>User-Agent</td><td><code>navigator.userAgent</code></td><td>✅</td><td>✅</td><td>✅</td></tr>
+        <tr><td>2</td><td>Touch Support</td><td><code>navigator.maxTouchPoints</code></td><td>✅ (5)</td><td>✅ (5–10)</td><td>✅ (0 or 1–10)</td></tr>
+        <tr><td>3</td><td>Platform</td><td><code>navigator.platform</code></td><td>✅</td><td>✅</td><td>✅</td></tr>
+        <tr><td>4</td><td>Cookies</td><td><code>navigator.cookieEnabled</code></td><td>✅</td><td>✅</td><td>✅</td></tr>
+        <tr><td>5</td><td>CPU Cores</td><td><code>navigator.hardwareConcurrency</code></td><td>✅ (capped)</td><td>✅</td><td>✅</td></tr>
+        <tr><td>6</td><td>Screen Resolution</td><td><code>screen.width/height</code> + <code>devicePixelRatio</code></td><td>✅</td><td>✅</td><td>✅</td></tr>
+        <tr><td>7</td><td>Viewport</td><td><code>window.innerWidth/innerHeight</code></td><td>✅</td><td>✅</td><td>✅</td></tr>
+        <tr><td>8</td><td>Device Memory</td><td><code>navigator.deviceMemory</code></td><td>❌</td><td>✅ (Chrome)</td><td>✅ (Chrome/Edge)</td></tr>
+        <tr><td>9</td><td>Color Depth</td><td><code>screen.colorDepth</code></td><td>✅</td><td>✅</td><td>✅</td></tr>
+        <tr><td>10</td><td>Reduced Motion</td><td><code>matchMedia("prefers-reduced-motion")</code></td><td>✅</td><td>✅</td><td>✅</td></tr>
+        <tr><td>11</td><td>Network Info</td><td><code>navigator.connection</code></td><td>❌</td><td>✅ (Chrome)</td><td>✅ (Chrome/Edge)</td></tr>
+        <tr><td>12</td><td>JavaScript</td><td>Implicit</td><td>✅</td><td>✅</td><td>✅</td></tr>
+      </tbody>
+    </table>
+
+    <hr>
+
+    <h2>4. References</h2>
+    <ol class="list-decimal list-inside space-y-1 text-gray-300">
+      <li>MDN — Navigator API: <a href="https://developer.mozilla.org/en-US/docs/Web/API/Navigator">developer.mozilla.org</a></li>
+      <li>MDN — User-Agent: <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/User-Agent">developer.mozilla.org</a></li>
+      <li>W3C — Network Information API: <a href="https://wicg.github.io/netinfo/">wicg.github.io/netinfo</a></li>
+      <li>W3C — Device Memory: <a href="https://www.w3.org/TR/device-memory/">w3.org/TR/device-memory</a></li>
+    </ol>
+
+    <hr>
+    <p class="text-center text-gray-500 text-sm mt-8"><em>useragent-web Project — May 2026</em></p>
+
+  </div>
+</body>
+</html>
