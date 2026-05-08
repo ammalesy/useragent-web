@@ -1,0 +1,13 @@
+#,Field,API,iOS,Android,Desktop
+1,User-Agent,navigator.userAgent,Yes,Yes,Yes
+2,Touch Support,navigator.maxTouchPoints,Yes (5),Yes (5-10),Yes (0 or 1-10)
+3,Platform,navigator.platform,Yes,Yes,Yes
+4,Cookies,navigator.cookieEnabled,Yes,Yes,Yes
+5,CPU Cores,navigator.hardwareConcurrency,Yes (capped),Yes,Yes
+6,Screen Resolution,screen.width/height + devicePixelRatio,Yes,Yes,Yes
+7,Viewport,window.innerWidth/innerHeight,Yes,Yes,Yes
+8,Device Memory,navigator.deviceMemory,No,Yes (Chrome),Yes (Chrome/Edge)
+9,Color Depth,screen.colorDepth,Yes,Yes,Yes
+10,Reduced Motion,matchMedia("prefers-reduced-motion"),Yes,Yes,Yes
+11,Network Info,navigator.connection,No,Yes (Chrome),Yes (Chrome/Edge)
+12,JavaScript,Implicit,Yes,Yes,Yes
