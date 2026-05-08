@@ -156,6 +156,7 @@
         fields.push({ label: "Engine", value: engine, sub: engVer, color: "violet" });
 
         // OS
+        // iPad in desktop mode reports "Mac OS X" — override using touch heuristic
         const osList = [
           { name: "Windows 11",  rx: /Windows NT 10\.0.*Win64/ },
           { name: "Windows 10",  rx: /Windows NT 10\.0/ },
@@ -174,16 +175,25 @@
           const m = ua.match(o.rx);
           if (m) { os = { name: o.name, version: m[1] ? m[1].replace(/_/g, ".") : "—" }; break; }
         }
+        // Correct macOS → iPadOS when touch points reveal it's actually an iPad
+        if (os.name === "macOS" && navigator.maxTouchPoints > 1) {
+          os.name = "iPadOS";
+          os.version = "(Desktop mode — version hidden)";
+        }
         fields.push({ label: "Operating System", value: os.name, sub: os.version !== "—" ? os.version : "", color: "sky" });
 
         // Device type
+        // iPad with "Request Desktop Website" sends Macintosh UA but has maxTouchPoints > 1
+        const isFakeDesktopIPad = /Macintosh/.test(ua) && navigator.maxTouchPoints > 1;
         let deviceType = "Desktop";
         let deviceIcon = "🖥️";
-        if (/Mobile|Android.*Mobile/.test(ua))            { deviceType = "Mobile Phone"; deviceIcon = "📱"; }
-        else if (/iPad|Android(?!.*Mobile)|Tablet/.test(ua)) { deviceType = "Tablet"; deviceIcon = "📟"; }
-        else if (/TV|SmartTV|HbbTV/.test(ua))              { deviceType = "Smart TV"; deviceIcon = "📺"; }
-        else if (/bot|crawl|spider/i.test(ua))             { deviceType = "Bot / Crawler"; deviceIcon = "🤖"; }
-        fields.push({ label: "Device Type", value: deviceIcon + " " + deviceType, sub: "", color: "teal" });
+        if (isFakeDesktopIPad)                                { deviceType = "Tablet (iPad)"; deviceIcon = "📟"; }
+        else if (/Mobile|Android.*Mobile/.test(ua))           { deviceType = "Mobile Phone"; deviceIcon = "📱"; }
+        else if (/iPad|Android(?!.*Mobile)|Tablet/.test(ua))  { deviceType = "Tablet"; deviceIcon = "📟"; }
+        else if (/TV|SmartTV|HbbTV/.test(ua))                 { deviceType = "Smart TV"; deviceIcon = "📺"; }
+        else if (/bot|crawl|spider/i.test(ua))                { deviceType = "Bot / Crawler"; deviceIcon = "🤖"; }
+        const deviceSub = isFakeDesktopIPad ? "⚠️ Desktop UA mode detected" : "";
+        fields.push({ label: "Device Type", value: deviceIcon + " " + deviceType, sub: deviceSub, color: "teal" });
 
         // Architecture
         let arch = "Unknown";
