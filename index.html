@@ -79,8 +79,14 @@
 
       <!-- Parsed Values -->
       <section>
-        <h2 class="text-sm font-semibold uppercase tracking-widest text-gray-400 mb-4">Parsed Values</h2>
+        <h2 class="text-sm font-semibold uppercase tracking-widest text-gray-400 mb-4">UA-String Values</h2>
         <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3" id="parsedGrid"></div>
+      </section>
+
+      <!-- Browser Environment -->
+      <section>
+        <h2 class="text-sm font-semibold uppercase tracking-widest text-gray-400 mb-4">Browser Environment</h2>
+        <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3" id="envGrid"></div>
       </section>
 
       <!-- Raw Tokens -->
@@ -211,6 +217,13 @@
         const touch = navigator.maxTouchPoints > 0;
         fields.push({ label: "Touch Support", value: touch ? `Yes (${navigator.maxTouchPoints} points)` : "No", sub: "", color: touch ? "green" : "gray" });
 
+        return fields;
+      }
+
+      // ─── Browser Environment (non-UA fields) ─────────────────────────────────
+      function parseBrowserEnv() {
+        const fields = [];
+
         // Timezone
         const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || "Unknown";
         const tzOffset = (() => { const o = -new Date().getTimezoneOffset(); return (o >= 0 ? "UTC+" : "UTC") + Math.floor(o/60) + ":" + String(Math.abs(o%60)).padStart(2,"0"); })();
@@ -315,6 +328,9 @@
 
         const fields = parseUA(ua);
         q("parsedGrid").innerHTML = fields.map(renderCard).join("");
+
+        const envFields = parseBrowserEnv();
+        q("envGrid").innerHTML = envFields.map(renderCard).join("");
 
         const tokens = tokenizeUA(ua);
         q("tokenList").innerHTML = tokens.map(renderToken).join("");
