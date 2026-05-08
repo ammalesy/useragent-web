@@ -110,6 +110,22 @@
         q("timestamp").textContent = now.toLocaleString();
       }
 
+      // ─── Copy Code Snippet ────────────────────────────────────────────────────
+      function copyCode(btn) {
+        const wrapper = btn.closest('.code-snippet');
+        const code = wrapper.querySelector('code').textContent;
+        navigator.clipboard.writeText(code).then(() => {
+          const label = btn.querySelector('.copy-code-label');
+          const orig = label.textContent;
+          label.textContent = 'Copied!';
+          btn.classList.replace('text-gray-400', 'text-green-400');
+          setTimeout(() => {
+            label.textContent = orig;
+            btn.classList.replace('text-green-400', 'text-gray-400');
+          }, 1500);
+        });
+      }
+
       // ─── Copy ─────────────────────────────────────────────────────────────────
       function copyUA() {
         const ua = navigator.userAgent;
@@ -144,7 +160,7 @@
           const m = ua.match(b.rx);
           if (m) { browser = { name: b.name, version: (m[1] || m[2] || "Unknown").split(".")[0] + "." + ((m[1] || m[2] || "").split(".")[1] || "x") }; break; }
         }
-        fields.push({ label: "Browser", value: browser.name, sub: "v" + browser.version, desc: "Detected by matching product tokens in the UA string (e.g. Chrome/xx, Firefox/xx)", color: "indigo" });
+        fields.push({ label: "Browser", value: browser.name, sub: "v" + browser.version, desc: "Detected by matching product tokens in the UA string (e.g. Chrome/xx, Firefox/xx)", color: "indigo", code: "const ua = navigator.userAgent;\nconst match = ua.match(/Chrome\\/([0-9.]+)/);\nconst browser = match ? match[1] : 'Unknown';" });
 
         // Engine
         let engine = "Unknown";
@@ -153,7 +169,7 @@
         else if (/Trident\//.test(ua))                     engine = "Trident";
         else if (/Presto\//.test(ua))                      engine = "Presto";
         const engVer = (ua.match(/(?:AppleWebKit|Gecko|Trident)\/([0-9.]+)/) || [])[1] || "—";
-        fields.push({ label: "Engine", value: engine, sub: engVer, desc: "Identified from AppleWebKit/, Gecko/, or Trident/ tokens in the UA string", color: "violet" });
+        fields.push({ label: "Engine", value: engine, sub: engVer, desc: "Identified from AppleWebKit/, Gecko/, or Trident/ tokens in the UA string", color: "violet", code: "const ua = navigator.userAgent;\nconst match = ua.match(/(?:AppleWebKit|Gecko|Trident)\\/([0-9.]+)/);\nconst engine = match ? match[1] : 'Unknown';" });
 
         // OS
         // iPad in desktop mode reports "Mac OS X" — override using touch heuristic
@@ -180,7 +196,7 @@
           os.name = "iPadOS";
           os.version = "(Desktop mode — version hidden)";
         }
-        fields.push({ label: "Operating System", value: os.name, sub: os.version !== "—" ? os.version : "", desc: "Parsed from the comment block in the UA string (e.g. Windows NT x.x, Mac OS X, Android x)", color: "sky" });
+        fields.push({ label: "Operating System", value: os.name, sub: os.version !== "—" ? os.version : "", desc: "Parsed from the comment block in the UA string (e.g. Windows NT x.x, Mac OS X, Android x)", color: "sky", code: "const ua = navigator.userAgent;\nconst match = ua.match(/Mac OS X ([0-9_]+)|Windows NT ([0-9.]+)|Android ([0-9.]+)|iPhone OS ([0-9_]+)/);\nconsole.log(match);" });
 
         // Device type
         // iPad with "Request Desktop Website" sends Macintosh UA but has maxTouchPoints > 1
@@ -193,14 +209,14 @@
         else if (/TV|SmartTV|HbbTV/.test(ua))                 { deviceType = "Smart TV"; deviceIcon = "📺"; }
         else if (/bot|crawl|spider/i.test(ua))                { deviceType = "Bot / Crawler"; deviceIcon = "🤖"; }
         const deviceSub = isFakeDesktopIPad ? "⚠️ Desktop UA mode detected" : "";
-        fields.push({ label: "Device Type", value: deviceIcon + " " + deviceType, sub: deviceSub, desc: "Inferred from UA keywords (Mobile, iPad, TV) + navigator.maxTouchPoints to catch iPad in desktop mode", color: "teal" });
+        fields.push({ label: "Device Type", value: deviceIcon + " " + deviceType, sub: deviceSub, desc: "Inferred from UA keywords (Mobile, iPad, TV) + navigator.maxTouchPoints to catch iPad in desktop mode", color: "teal", code: "const ua = navigator.userAgent;\nconst isMobile = /Mobile|Android.*Mobile/.test(ua);\nconst isTablet = /iPad|Android(?!.*Mobile)|Tablet/.test(ua);\nconst touchPoints = navigator.maxTouchPoints;" });
 
         // Architecture
         let arch = "Unknown";
         if (/Win64|x64|x86_64|WOW64/.test(ua))  arch = "x86-64 (64-bit)";
         else if (/Win32|i686|i386/.test(ua))     arch = "x86 (32-bit)";
         else if (/arm|aarch64/i.test(ua))        arch = "ARM";
-        fields.push({ label: "Architecture", value: arch, sub: "", desc: "Detected from UA tokens like Win64, x86_64, WOW64, or arm/aarch64", color: "amber" });
+        fields.push({ label: "Architecture", value: arch, sub: "", desc: "Detected from UA tokens like Win64, x86_64, WOW64, or arm/aarch64", color: "amber", code: "const ua = navigator.userAgent;\nconst is64 = /Win64|x64|x86_64|WOW64/.test(ua);\nconst isARM = /arm|aarch64/i.test(ua);" });
 
         return fields;
       }
@@ -211,72 +227,72 @@
 
         // Language
         const lang = navigator.language || navigator.languages?.[0] || "Unknown";
-        fields.push({ label: "Language", value: lang, sub: (navigator.languages || []).slice(0,3).join(", "), desc: "From navigator.language / navigator.languages — set by browser language preference", color: "rose" });
+        fields.push({ label: "Language", value: lang, sub: (navigator.languages || []).slice(0,3).join(", "), desc: "From navigator.language / navigator.languages — set by browser language preference", color: "rose", code: "const lang = navigator.language;\nconst allLangs = navigator.languages;\nconsole.log(lang, allLangs);" });
 
         // Platform
         const platform = navigator.platform || "Unknown";
-        fields.push({ label: "Platform", value: platform, sub: "", desc: "From navigator.platform — reports the OS/CPU platform string (deprecated but still available)", color: "orange" });
+        fields.push({ label: "Platform", value: platform, sub: "", desc: "From navigator.platform — reports the OS/CPU platform string (deprecated but still available)", color: "orange", code: "const platform = navigator.platform;\nconsole.log(platform); // e.g. 'MacIntel', 'Win32'" });
 
         // Cookies
-        fields.push({ label: "Cookies", value: navigator.cookieEnabled ? "Enabled" : "Disabled", sub: "", desc: "From navigator.cookieEnabled — indicates whether the browser accepts cookies", color: navigator.cookieEnabled ? "green" : "red" });
+        fields.push({ label: "Cookies", value: navigator.cookieEnabled ? "Enabled" : "Disabled", sub: "", desc: "From navigator.cookieEnabled — indicates whether the browser accepts cookies", color: navigator.cookieEnabled ? "green" : "red", code: "const cookiesEnabled = navigator.cookieEnabled;\nconsole.log(cookiesEnabled); // true or false" });
 
         // Hardware concurrency
         const cores = navigator.hardwareConcurrency;
-        if (cores) fields.push({ label: "CPU Cores", value: cores + " logical cores", sub: "", desc: "From navigator.hardwareConcurrency — logical CPU thread count available to the browser", color: "cyan" });
+        if (cores) fields.push({ label: "CPU Cores", value: cores + " logical cores", sub: "", desc: "From navigator.hardwareConcurrency — logical CPU thread count available to the browser", color: "cyan", code: "const cores = navigator.hardwareConcurrency;\nconsole.log(cores); // e.g. 8" });
 
         // Screen
-        fields.push({ label: "Screen Resolution", value: `${screen.width} × ${screen.height}`, sub: `${window.devicePixelRatio}x DPR`, desc: "From screen.width / screen.height + window.devicePixelRatio for pixel density", color: "purple" });
+        fields.push({ label: "Screen Resolution", value: `${screen.width} × ${screen.height}`, sub: `${window.devicePixelRatio}x DPR`, desc: "From screen.width / screen.height + window.devicePixelRatio for pixel density", color: "purple", code: "const w = screen.width;\nconst h = screen.height;\nconst dpr = window.devicePixelRatio;\nconsole.log(w + ' × ' + h + ' @' + dpr + 'x');" });
 
         // Viewport
-        fields.push({ label: "Viewport", value: `${window.innerWidth} × ${window.innerHeight}`, sub: "px", desc: "From window.innerWidth / innerHeight — the visible browser window area excluding toolbars", color: "fuchsia" });
+        fields.push({ label: "Viewport", value: `${window.innerWidth} × ${window.innerHeight}`, sub: "px", desc: "From window.innerWidth / innerHeight — the visible browser window area excluding toolbars", color: "fuchsia", code: "const vw = window.innerWidth;\nconst vh = window.innerHeight;\nconsole.log(vw + ' × ' + vh);" });
 
         // Touch
         const touch = navigator.maxTouchPoints > 0;
-        fields.push({ label: "Touch Support", value: touch ? `Yes (${navigator.maxTouchPoints} points)` : "No", sub: "", desc: "From navigator.maxTouchPoints — number of simultaneous touch points the device supports", color: touch ? "green" : "gray" });
+        fields.push({ label: "Touch Support", value: touch ? `Yes (${navigator.maxTouchPoints} points)` : "No", sub: "", desc: "From navigator.maxTouchPoints — number of simultaneous touch points the device supports", color: touch ? "green" : "gray", code: "const touchPoints = navigator.maxTouchPoints;\nconst hasTouch = touchPoints > 0;\nconsole.log(hasTouch, touchPoints);" });
 
         // Timezone
         const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || "Unknown";
         const tzOffset = (() => { const o = -new Date().getTimezoneOffset(); return (o >= 0 ? "UTC+" : "UTC") + Math.floor(o/60) + ":" + String(Math.abs(o%60)).padStart(2,"0"); })();
-        fields.push({ label: "Timezone", value: tz, sub: tzOffset, desc: "From Intl.DateTimeFormat().resolvedOptions().timeZone — the browser's local timezone", color: "sky" });
+        fields.push({ label: "Timezone", value: tz, sub: tzOffset, desc: "From Intl.DateTimeFormat().resolvedOptions().timeZone — the browser's local timezone", color: "sky", code: "const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;\nconst offset = new Date().getTimezoneOffset();\nconsole.log(tz, offset);" });
 
         // Device Memory
         const mem = navigator.deviceMemory;
-        if (mem) fields.push({ label: "Device Memory", value: mem + " GB (approx.)", sub: "navigator.deviceMemory", desc: "From navigator.deviceMemory — rounded to nearest power of 2 (privacy protection)", color: "cyan" });
+        if (mem) fields.push({ label: "Device Memory", value: mem + " GB (approx.)", sub: "navigator.deviceMemory", desc: "From navigator.deviceMemory — rounded to nearest power of 2 (privacy protection)", color: "cyan", code: "const memory = navigator.deviceMemory;\nconsole.log(memory + ' GB'); // 0.25, 0.5, 1, 2, 4, 8" });
 
         // Color Depth
-        fields.push({ label: "Color Depth", value: screen.colorDepth + "-bit", sub: `Pixel depth: ${screen.pixelDepth}-bit`, desc: "From screen.colorDepth / screen.pixelDepth — bits per pixel used by the display", color: "purple" });
+        fields.push({ label: "Color Depth", value: screen.colorDepth + "-bit", sub: `Pixel depth: ${screen.pixelDepth}-bit`, desc: "From screen.colorDepth / screen.pixelDepth — bits per pixel used by the display", color: "purple", code: "const colorDepth = screen.colorDepth;\nconst pixelDepth = screen.pixelDepth;\nconsole.log(colorDepth + '-bit');" });
 
         // Color Scheme
         const darkMode = window.matchMedia("(prefers-color-scheme: dark)").matches;
-        fields.push({ label: "Color Scheme", value: darkMode ? "🌙 Dark" : "☀️ Light", sub: "prefers-color-scheme", desc: "From window.matchMedia('prefers-color-scheme') — reflects the OS-level dark/light mode setting", color: darkMode ? "violet" : "amber" });
+        fields.push({ label: "Color Scheme", value: darkMode ? "🌙 Dark" : "☀️ Light", sub: "prefers-color-scheme", desc: "From window.matchMedia('prefers-color-scheme') — reflects the OS-level dark/light mode setting", color: darkMode ? "violet" : "amber", code: "const isDark = matchMedia('(prefers-color-scheme: dark)').matches;\nconsole.log(isDark ? 'Dark mode' : 'Light mode');" });
 
         // Reduced Motion
         const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-        fields.push({ label: "Reduced Motion", value: reducedMotion ? "Requested" : "No preference", sub: "prefers-reduced-motion", desc: "From window.matchMedia('prefers-reduced-motion') — set in OS accessibility settings", color: reducedMotion ? "rose" : "gray" });
+        fields.push({ label: "Reduced Motion", value: reducedMotion ? "Requested" : "No preference", sub: "prefers-reduced-motion", desc: "From window.matchMedia('prefers-reduced-motion') — set in OS accessibility settings", color: reducedMotion ? "rose" : "gray", code: "const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;\nconsole.log(reduced); // true if user prefers reduced motion" });
 
         // Network
         const conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
         if (conn) {
           const netType = conn.effectiveType || conn.type || "Unknown";
           const downlink = conn.downlink ? conn.downlink + " Mbps" : "";
-          fields.push({ label: "Network", value: netType.toUpperCase(), sub: downlink, desc: "From navigator.connection (Network Information API) — effective connection type and estimated downlink", color: "teal" });
+          fields.push({ label: "Network", value: netType.toUpperCase(), sub: downlink, desc: "From navigator.connection (Network Information API) — effective connection type and estimated downlink", color: "teal", code: "const conn = navigator.connection;\nif (conn) {\n  console.log(conn.effectiveType); // '4g'\n  console.log(conn.downlink);       // Mbps\n}" });
         }
 
         // Online status
-        fields.push({ label: "Online Status", value: navigator.onLine ? "🟢 Online" : "🔴 Offline", sub: "", desc: "From navigator.onLine — true if the browser has network connectivity", color: navigator.onLine ? "green" : "red" });
+        fields.push({ label: "Online Status", value: navigator.onLine ? "🟢 Online" : "🔴 Offline", sub: "", desc: "From navigator.onLine — true if the browser has network connectivity", color: navigator.onLine ? "green" : "red", code: "const isOnline = navigator.onLine;\nwindow.addEventListener('online', () => console.log('Back online'));\nwindow.addEventListener('offline', () => console.log('Gone offline'));" });
 
         // Do Not Track
         const dnt = navigator.doNotTrack || window.doNotTrack;
         const dntLabel = dnt === "1" ? "Enabled" : dnt === "0" ? "Disabled" : "Not set";
-        fields.push({ label: "Do Not Track", value: dntLabel, sub: "", desc: "From navigator.doNotTrack — user's preference to opt out of cross-site tracking", color: dnt === "1" ? "green" : "gray" });
+        fields.push({ label: "Do Not Track", value: dntLabel, sub: "", desc: "From navigator.doNotTrack — user's preference to opt out of cross-site tracking", color: dnt === "1" ? "green" : "gray", code: "const dnt = navigator.doNotTrack;\nconsole.log(dnt); // '1' = enabled, '0' = disabled, null = not set" });
 
         // PDF Viewer
         if (typeof navigator.pdfViewerEnabled !== "undefined") {
-          fields.push({ label: "PDF Viewer", value: navigator.pdfViewerEnabled ? "Supported" : "Not supported", sub: "", desc: "From navigator.pdfViewerEnabled — whether the browser can display PDFs inline", color: navigator.pdfViewerEnabled ? "green" : "gray" });
+          fields.push({ label: "PDF Viewer", value: navigator.pdfViewerEnabled ? "Supported" : "Not supported", sub: "", desc: "From navigator.pdfViewerEnabled — whether the browser can display PDFs inline", color: navigator.pdfViewerEnabled ? "green" : "gray", code: "const hasPDF = navigator.pdfViewerEnabled;\nconsole.log(hasPDF); // true or false" });
         }
 
         // JavaScript enabled (trivially yes if we're running)
-        fields.push({ label: "JavaScript", value: "✅ Enabled", sub: "", desc: "Confirmed by execution — if this page loaded, JS is running", color: "green" });
+        fields.push({ label: "JavaScript", value: "✅ Enabled", sub: "", desc: "Confirmed by execution — if this page loaded, JS is running", color: "green", code: "// JS is enabled if this code runs\n// Use <noscript> for fallback:\n// <noscript>Please enable JavaScript</noscript>" });
 
         return fields;
       }
@@ -313,14 +329,26 @@
         gray:   "bg-gray-800 border-gray-600 text-gray-300",
       };
 
-      function renderCard({ label, value, sub, desc, color }) {
+      function renderCard({ label, value, sub, desc, color, code }) {
         const cls = colorMap[color] || colorMap.gray;
+        const codeBlock = code ? `
+            <div class="code-snippet mt-2 rounded-lg bg-black/30 border border-white/5 overflow-hidden">
+              <div class="flex items-center justify-between px-2.5 py-1 border-b border-white/5">
+                <span class="text-[10px] uppercase tracking-wider opacity-40 font-medium">JavaScript</span>
+                <button onclick="copyCode(this)" class="flex items-center gap-1 text-[10px] text-gray-400 hover:text-white transition" aria-label="Copy code">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-4 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+                  <span class="copy-code-label">Copy</span>
+                </button>
+              </div>
+              <pre class="px-2.5 py-2 text-[11px] leading-relaxed overflow-x-auto"><code class="text-green-400/80">${code}</code></pre>
+            </div>` : '';
         return `
           <div class="rounded-xl border ${cls} px-4 py-3 space-y-1">
             <p class="text-xs font-medium uppercase tracking-wider opacity-60">${label}</p>
             <p class="text-sm font-semibold break-all">${value}</p>
             ${sub ? `<p class="text-xs opacity-50 mono">${sub}</p>` : ""}
             ${desc ? `<p class="text-xs opacity-40 italic mt-1">${desc}</p>` : ""}
+            ${codeBlock}
           </div>`;
       }
 
