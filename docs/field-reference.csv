@@ -1,13 +1,13 @@
 #,Field,API,Possible Value,Support (iOS/Android/Desktop)
-1,User-Agent,navigator.userAgent,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 ...",iOS ✅ / Android ✅ / Desktop ✅
-2,Touch Support,navigator.maxTouchPoints,"0, 1, 5, 10",iOS ✅ (5) / Android ✅ (5–10) / Desktop ✅ (0 or 1–10)
-3,Platform,navigator.platform,"MacIntel, Win32, Linux x86_64, iPhone, Linux armv81",iOS ✅ / Android ✅ / Desktop ✅
-4,Cookies,navigator.cookieEnabled,"true, false",iOS ✅ / Android ✅ / Desktop ✅
-5,CPU Cores,navigator.hardwareConcurrency,"1–16+",iOS ✅ (capped) / Android ✅ / Desktop ✅
-6,Screen Resolution,screen.width/height + devicePixelRatio,"393×852 @3x, 1920×1080 @1x, etc.",iOS ✅ / Android ✅ / Desktop ✅
-7,Viewport,window.innerWidth/innerHeight,"360×640, 1440×820, etc.",iOS ✅ / Android ✅ / Desktop ✅
-8,Device Memory,navigator.deviceMemory,"0.25, 0.5, 1, 2, 4, 8 (GB) or undefined",iOS ❌ / Android ✅ (Chrome) / Desktop ✅ (Chrome/Edge)
-9,Color Depth,screen.colorDepth,"24 (True Color), 30 (HDR)",iOS ✅ / Android ✅ / Desktop ✅
-10,Reduced Motion,matchMedia("prefers-reduced-motion"),"true (reduce), false (no-preference)",iOS ✅ / Android ✅ / Desktop ✅
-11,Network Info,navigator.connection,"effectiveType: slow-2g/2g/3g/4g, downlink: Mbps, rtt: ms",iOS ❌ / Android ✅ (Chrome) / Desktop ✅ (Chrome/Edge)
-12,JavaScript,Implicit,"true (always if code runs)",iOS ✅ / Android ✅ / Desktop ✅
+1,User-Agent,"const ua = navigator.userAgent;","Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 ...",iOS ✅ / Android ✅ / Desktop ✅
+2,Touch Support,"const points = navigator.maxTouchPoints; // 0 = no touch, 5 = typical phone/tablet","0, 1, 5, 10",iOS ✅ (5) / Android ✅ (5–10) / Desktop ✅ (0 or 1–10)
+3,Platform,"const platform = navigator.platform; // deprecated but still works","MacIntel, Win32, Linux x86_64, iPhone, Linux armv81",iOS ✅ / Android ✅ / Desktop ✅
+4,Cookies,"const enabled = navigator.cookieEnabled; // true if browser accepts cookies","true, false",iOS ✅ / Android ✅ / Desktop ✅
+5,CPU Cores,"const cores = navigator.hardwareConcurrency; // logical threads, not physical cores","1–16+",iOS ✅ (capped) / Android ✅ / Desktop ✅
+6,Screen Resolution,"const w = screen.width; const h = screen.height; const dpr = window.devicePixelRatio;","393×852 @3x, 1920×1080 @1x, etc.",iOS ✅ / Android ✅ / Desktop ✅
+7,Viewport,"const vw = window.innerWidth; const vh = window.innerHeight; // excludes browser chrome","360×640, 1440×820, etc.",iOS ✅ / Android ✅ / Desktop ✅
+8,Device Memory,"const ram = navigator.deviceMemory; // GB rounded to power of 2, undefined on Safari/Firefox","0.25, 0.5, 1, 2, 4, 8 (GB) or undefined",iOS ❌ / Android ✅ (Chrome) / Desktop ✅ (Chrome/Edge)
+9,Color Depth,"const bits = screen.colorDepth; // bits per pixel (24 = True Color, 30 = HDR)","24 (True Color), 30 (HDR)",iOS ✅ / Android ✅ / Desktop ✅
+10,Reduced Motion,"const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches; // boolean","true (reduce), false (no-preference)",iOS ✅ / Android ✅ / Desktop ✅
+11,Network Info,"const conn = navigator.connection; // conn.effectiveType, conn.downlink (Mbps), conn.rtt (ms)","effectiveType: slow-2g/2g/3g/4g, downlink: Mbps, rtt: ms",iOS ❌ / Android ✅ (Chrome) / Desktop ✅ (Chrome/Edge)
+12,JavaScript,"// Implicit: if this code runs then JS is enabled; use <noscript> for fallback","true (always if code runs)",iOS ✅ / Android ✅ / Desktop ✅
