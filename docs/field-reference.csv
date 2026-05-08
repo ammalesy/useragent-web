@@ -1,13 +1,13 @@
-#,Field,API,iOS,Android,Desktop
-1,User-Agent,navigator.userAgent,Yes,Yes,Yes
-2,Touch Support,navigator.maxTouchPoints,Yes (5),Yes (5-10),Yes (0 or 1-10)
-3,Platform,navigator.platform,Yes,Yes,Yes
-4,Cookies,navigator.cookieEnabled,Yes,Yes,Yes
-5,CPU Cores,navigator.hardwareConcurrency,Yes (capped),Yes,Yes
-6,Screen Resolution,screen.width/height + devicePixelRatio,Yes,Yes,Yes
-7,Viewport,window.innerWidth/innerHeight,Yes,Yes,Yes
-8,Device Memory,navigator.deviceMemory,No,Yes (Chrome),Yes (Chrome/Edge)
-9,Color Depth,screen.colorDepth,Yes,Yes,Yes
-10,Reduced Motion,matchMedia("prefers-reduced-motion"),Yes,Yes,Yes
-11,Network Info,navigator.connection,No,Yes (Chrome),Yes (Chrome/Edge)
-12,JavaScript,Implicit,Yes,Yes,Yes
+#,Field,API,Possible Value,Support (iOS/Android/Desktop)
+1,User-Agent,navigator.userAgent,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 ...",iOS ✅ / Android ✅ / Desktop ✅
+2,Touch Support,navigator.maxTouchPoints,"0, 1, 5, 10",iOS ✅ (5) / Android ✅ (5–10) / Desktop ✅ (0 or 1–10)
+3,Platform,navigator.platform,"MacIntel, Win32, Linux x86_64, iPhone, Linux armv81",iOS ✅ / Android ✅ / Desktop ✅
+4,Cookies,navigator.cookieEnabled,"true, false",iOS ✅ / Android ✅ / Desktop ✅
+5,CPU Cores,navigator.hardwareConcurrency,"1–16+",iOS ✅ (capped) / Android ✅ / Desktop ✅
+6,Screen Resolution,screen.width/height + devicePixelRatio,"393×852 @3x, 1920×1080 @1x, etc.",iOS ✅ / Android ✅ / Desktop ✅
+7,Viewport,window.innerWidth/innerHeight,"360×640, 1440×820, etc.",iOS ✅ / Android ✅ / Desktop ✅
+8,Device Memory,navigator.deviceMemory,"0.25, 0.5, 1, 2, 4, 8 (GB) or undefined",iOS ❌ / Android ✅ (Chrome) / Desktop ✅ (Chrome/Edge)
+9,Color Depth,screen.colorDepth,"24 (True Color), 30 (HDR)",iOS ✅ / Android ✅ / Desktop ✅
+10,Reduced Motion,matchMedia("prefers-reduced-motion"),"true (reduce), false (no-preference)",iOS ✅ / Android ✅ / Desktop ✅
+11,Network Info,navigator.connection,"effectiveType: slow-2g/2g/3g/4g, downlink: Mbps, rtt: ms",iOS ❌ / Android ✅ (Chrome) / Desktop ✅ (Chrome/Edge)
+12,JavaScript,Implicit,"true (always if code runs)",iOS ✅ / Android ✅ / Desktop ✅
