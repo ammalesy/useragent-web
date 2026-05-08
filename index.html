@@ -192,7 +192,14 @@
         else if (/arm|aarch64/i.test(ua))        arch = "ARM";
         fields.push({ label: "Architecture", value: arch, sub: "", color: "amber" });
 
-        // Language (best-effort from navigator)
+        return fields;
+      }
+
+      // ─── Browser Environment (non-UA fields) ─────────────────────────────────
+      function parseBrowserEnv() {
+        const fields = [];
+
+        // Language
         const lang = navigator.language || navigator.languages?.[0] || "Unknown";
         fields.push({ label: "Language", value: lang, sub: (navigator.languages || []).slice(0,3).join(", "), color: "rose" });
 
@@ -216,13 +223,6 @@
         // Touch
         const touch = navigator.maxTouchPoints > 0;
         fields.push({ label: "Touch Support", value: touch ? `Yes (${navigator.maxTouchPoints} points)` : "No", sub: "", color: touch ? "green" : "gray" });
-
-        return fields;
-      }
-
-      // ─── Browser Environment (non-UA fields) ─────────────────────────────────
-      function parseBrowserEnv() {
-        const fields = [];
 
         // Timezone
         const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || "Unknown";
