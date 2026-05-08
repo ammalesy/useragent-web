@@ -211,6 +211,50 @@
         const touch = navigator.maxTouchPoints > 0;
         fields.push({ label: "Touch Support", value: touch ? `Yes (${navigator.maxTouchPoints} points)` : "No", sub: "", color: touch ? "green" : "gray" });
 
+        // Timezone
+        const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || "Unknown";
+        const tzOffset = (() => { const o = -new Date().getTimezoneOffset(); return (o >= 0 ? "UTC+" : "UTC") + Math.floor(o/60) + ":" + String(Math.abs(o%60)).padStart(2,"0"); })();
+        fields.push({ label: "Timezone", value: tz, sub: tzOffset, color: "sky" });
+
+        // Device Memory
+        const mem = navigator.deviceMemory;
+        if (mem) fields.push({ label: "Device Memory", value: mem + " GB (approx.)", sub: "navigator.deviceMemory", color: "cyan" });
+
+        // Color Depth
+        fields.push({ label: "Color Depth", value: screen.colorDepth + "-bit", sub: `Pixel depth: ${screen.pixelDepth}-bit`, color: "purple" });
+
+        // Color Scheme
+        const darkMode = window.matchMedia("(prefers-color-scheme: dark)").matches;
+        fields.push({ label: "Color Scheme", value: darkMode ? "🌙 Dark" : "☀️ Light", sub: "prefers-color-scheme", color: darkMode ? "violet" : "amber" });
+
+        // Reduced Motion
+        const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        fields.push({ label: "Reduced Motion", value: reducedMotion ? "Requested" : "No preference", sub: "prefers-reduced-motion", color: reducedMotion ? "rose" : "gray" });
+
+        // Network
+        const conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+        if (conn) {
+          const netType = conn.effectiveType || conn.type || "Unknown";
+          const downlink = conn.downlink ? conn.downlink + " Mbps" : "";
+          fields.push({ label: "Network", value: netType.toUpperCase(), sub: downlink, color: "teal" });
+        }
+
+        // Online status
+        fields.push({ label: "Online Status", value: navigator.onLine ? "🟢 Online" : "🔴 Offline", sub: "", color: navigator.onLine ? "green" : "red" });
+
+        // Do Not Track
+        const dnt = navigator.doNotTrack || window.doNotTrack;
+        const dntLabel = dnt === "1" ? "Enabled" : dnt === "0" ? "Disabled" : "Not set";
+        fields.push({ label: "Do Not Track", value: dntLabel, sub: "", color: dnt === "1" ? "green" : "gray" });
+
+        // PDF Viewer
+        if (typeof navigator.pdfViewerEnabled !== "undefined") {
+          fields.push({ label: "PDF Viewer", value: navigator.pdfViewerEnabled ? "Supported" : "Not supported", sub: "", color: navigator.pdfViewerEnabled ? "green" : "gray" });
+        }
+
+        // JavaScript enabled (trivially yes if we're running)
+        fields.push({ label: "JavaScript", value: "✅ Enabled", sub: "", color: "green" });
+
         return fields;
       }
 
